@@ -1,0 +1,19 @@
+# Rose Glass Recovery Requirements
+
+# No external dependencies for core functionality
+# Framework designed to be lightweight and portable
+
+# Optional dependencies for extended features:
+# numpy>=1.21.0  # For advanced gradient calculations
+# pandas>=1.3.0  # For session history analysis
+# fastapi>=0.68.0  # For API deployment
+# uvicorn>=0.15.0  # For API server
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=3.0.0
+
+# Development
+black>=22.0.0
+ruff>=0.0.261
+mypy>=0.950

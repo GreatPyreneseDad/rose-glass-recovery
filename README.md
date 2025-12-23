@@ -4,6 +4,61 @@
 
 > *"The counselor already knows. Rose Glass makes it visible."*
 
+## Architecture
+
+This repo provides **recovery-specific calibrations and clinical insights** on top of the core [Rose Glass](https://github.com/GreatPyreneseDad/rose-glass) ML framework.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   rose-glass-recovery                        │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
+│  │ Recovery        │  │ Clinical        │  │ Session     │ │
+│  │ Calibrations    │  │ Insights        │  │ Trajectory  │ │
+│  └────────┬────────┘  └────────┬────────┘  └──────┬──────┘ │
+│           │                    │                   │        │
+│           └────────────────────┼───────────────────┘        │
+│                                │                            │
+│                    ┌───────────▼───────────┐               │
+│                    │   RoseGlassBridge     │               │
+│                    │   (ML or Regex)       │               │
+│                    └───────────┬───────────┘               │
+└────────────────────────────────┼────────────────────────────┘
+                                 │
+                    ┌────────────▼────────────┐
+                    │     rose-glass (core)   │
+                    │  ┌────┐ ┌────┐ ┌────┐  │
+                    │  │ Ψ  │ │ ρ  │ │ q  │  │
+                    │  │ ML │ │ ML │ │ ML │  │
+                    │  └────┘ └────┘ └────┘  │
+                    │  ┌────┐ ┌────┐ ┌────┐  │
+                    │  │ f  │ │ τ  │ │ λ  │  │
+                    │  │ ML │ │ ML │ │ ML │  │
+                    │  └────┘ └────┘ └────┘  │
+                    └─────────────────────────┘
+```
+
+### Two Modes
+
+**ML Mode** (when `rose-glass` is installed):
+- Full neural network extractors for Ψ, ρ, q, f
+- Transformer-based embeddings (RoBERTa)
+- Biological optimization with learned parameters
+- ~85% accuracy target
+
+**Regex Mode** (standalone fallback):
+- Pattern matching for key markers
+- No external dependencies
+- ~70% accuracy
+- Fast, explainable
+
+```python
+from src.integrations import get_bridge
+
+# Auto-detects available mode
+bridge = get_bridge()
+print(bridge.mode_description)  # "ML Mode (Rose Glass Core v2.1)" or "Regex Mode (Fallback)"
+```
+
 ## The Problem
 
 Addiction counselors develop intuition through pattern recognition across hundreds of clients. They *feel* when someone is heading toward relapse. But:
@@ -11,14 +66,13 @@ Addiction counselors develop intuition through pattern recognition across hundre
 - That intuition is dismissed as "soft" or "subjective"
 - Documentation systems capture *content* ("discussed triggers") not *pattern* ("isolation language increasing")  
 - By the time "objective" metrics show risk (missed appointments, positive test), the window for intervention has closed
-- The client is already gone
 
 ## The Solution
 
 Rose Glass translates counselor intuition into visible dimensions that clinical teams can act on—**without judgment, without diagnosis, without pathologizing**.
 
 ```python
-from rose_glass_recovery import RecoveryTranslator
+from src.core import RecoveryTranslator
 
 translator = RecoveryTranslator()
 
@@ -37,83 +91,35 @@ f-dimension collapse: Client shifted from "we" and "my sponsor" to "I" and
 "nobody understands" over last 3 sessions.
 
 q-gradient spike: Emotional activation doubles when employment discussed.
-Biological optimization indicates approaching saturation.
-
-τ-compression: No integration of past patterns. Living in immediate present
-without connecting to recovery narrative.
-
-TRANSLATION: Client may be performing recovery for therapist rather than
-processing underlying drivers. Consider:
-- Gentle inquiry about sponsor relationship
-- Explore employment stress without solution-pushing
-- Create space for authentic expression
 
 Estimated intervention window: 7-14 days before crisis point
 ```
 
-## Core Philosophy
+## Installation
 
-### Translation, Not Measurement
-
-Rose Glass does NOT:
-- ❌ Diagnose addiction severity
-- ❌ Judge recovery progress
-- ❌ Replace counselor intuition
-- ❌ Provide treatment recommendations
-- ❌ Profile clients
-
-Rose Glass DOES:
-- ✅ Make invisible patterns visible
-- ✅ Validate what counselors already sense
-- ✅ Provide language for clinical advocacy
-- ✅ Respect neurodivergent communication styles
-- ✅ Honor cultural differences in expressing struggle
-
-### The Four Dimensions
-
-| Dimension | Recovery Context | Risk Signal |
-|-----------|------------------|-------------|
-| **Ψ (Psi)** | Narrative consistency | Contradictions, fragmented story |
-| **ρ (Rho)** | Wisdom integration | No connection to past patterns |
-| **q** | Emotional activation | Spike around specific topics |
-| **f** | Social belonging | "We" → "I" shift, isolation language |
-
-### Additional Dimensions (v2.1)
-
-| Dimension | Recovery Context | What It Reveals |
-|-----------|------------------|-----------------|
-| **τ (Tau)** | Temporal depth | Living in crisis present vs. integrated timeline |
-| **λ (Lambda)** | Lens interference | How cultural context shapes expression |
-| **∇q/∇t** | Gradient tracking | Escalation trajectory, intervention window |
-
-## Academic Validation
-
-Rose Glass dimensions are validated against peer-reviewed research on Reddit addiction recovery communities (r/stopdrinking, r/OpiatesRecovery):
-
-| Finding | Source | Rose Glass Mapping |
-|---------|--------|-------------------|
-| "Stressed" has 40% similarity to "drink" | Kramer et al. 2024 (PLOS One) | q-dimension activation |
-| "Bored" has 45% similarity to "craving" | Kramer et al. 2024 | q-dimension trigger |
-| Social isolation predicts relapse | Lu et al. 2019 (KDD) | f-dimension collapse |
-| 78.48% accuracy predicting escalation | ResearchGate 2024 | Ψ-dimension consistency |
-| "Harm reduction" terms signal de-escalation | JMIR 2024 | ρ-dimension wisdom |
-
-See [docs/ACADEMIC_VALIDATION.md](docs/ACADEMIC_VALIDATION.md) for complete research mapping.
-
-## Quick Start
-
-### Installation
-
+### Standalone (Regex Mode)
 ```bash
 git clone https://github.com/GreatPyreneseDad/rose-glass-recovery.git
 cd rose-glass-recovery
 pip install -r requirements.txt
 ```
 
-### Basic Usage
+### With ML (Recommended)
+```bash
+# First install core
+git clone https://github.com/GreatPyreneseDad/rose-glass.git ~/rose-glass
+pip install -r ~/rose-glass/requirements.txt
+
+# Then install recovery
+git clone https://github.com/GreatPyreneseDad/rose-glass-recovery.git
+cd rose-glass-recovery
+pip install -r requirements.txt
+```
+
+## Quick Start
 
 ```python
-from rose_glass_recovery import RecoveryTranslator
+from src.core import RecoveryTranslator
 
 # Initialize with trauma-informed defaults
 translator = RecoveryTranslator(
@@ -135,142 +141,79 @@ print(f"Authenticity: {result.authenticity_score:.2f}")  # Performance detected
 
 ```python
 # Track patterns across session
-session = translator.start_session(client_id="anonymous_001")
+translator.start_session()
 
-# Add statements as session progresses
-session.add_statement("I've been doing great this week")
-session.add_statement("Work has been stressful but I'm handling it")
-session.add_statement("I don't really need meetings anymore")
-session.add_statement("Nobody at work understands what I'm going through")
+translator.add_to_session("I've been doing great this week")
+translator.add_to_session("Work has been stressful but I'm handling it")
+translator.add_to_session("I don't really need meetings anymore")
+translator.add_to_session("Nobody at work understands what I'm going through")
 
 # Get trajectory analysis
-trajectory = session.get_trajectory()
+trajectory = translator.get_session_trajectory()
 
 print(f"f-dimension trend: {trajectory.f_trend}")  # DECLINING
 print(f"Isolation markers: {trajectory.isolation_markers}")
 print(f"Intervention window: {trajectory.estimated_window}")
 ```
 
-### Multi-Session Patterns
+## The Four Dimensions (Recovery Context)
 
-```python
-# Compare across sessions
-history = translator.load_session_history(client_id="anonymous_001")
+| Dimension | What It Measures | Risk Signal |
+|-----------|------------------|-------------|
+| **Ψ (Psi)** | Narrative consistency | Contradictions, fragmented story |
+| **ρ (Rho)** | Wisdom integration | No connection to past patterns |
+| **q** | Emotional activation | Spike around specific topics |
+| **f** | Social belonging | "We" → "I" shift, isolation language |
 
-pattern = translator.analyze_longitudinal(history, sessions=5)
+### Extended Dimensions
 
-print(pattern.get_narrative())
-# "Over 5 sessions, f-dimension has declined from 0.72 to 0.41.
-#  Client language shifted from collective ('we', 'my group') to 
-#  isolated ('I', 'alone', 'nobody'). q-activation stable except
-#  when employment discussed (spike to 0.89). Pattern suggests
-#  increasing isolation while maintaining performance of recovery."
-```
+| Dimension | What It Measures | What It Reveals |
+|-----------|------------------|-----------------|
+| **τ (Tau)** | Temporal depth | Living in crisis present vs. integrated timeline |
+| **λ (Lambda)** | Lens interference | How cultural context shapes expression |
+| **∇q/∇t** | Gradient tracking | Escalation trajectory, intervention window |
 
 ## Neurodivergent Calibrations
 
-Many addiction clients are neurodivergent. Standard "affect detection" pathologizes their communication. Rose Glass includes calibrations that translate accurately:
+Many addiction clients are neurodivergent. Standard "affect detection" pathologizes their communication:
 
-### Autism Spectrum Calibration
 ```python
+# Autism: Values logical consistency, direct communication
 translator = RecoveryTranslator(calibration="autism_spectrum")
 
-# "Flat affect" reads correctly as stable, not disengaged
-# Direct communication valued, not flagged as "resistant"
-# Ψ-dimension prioritized (logical consistency matters most)
-```
-
-### ADHD Calibration
-```python
+# ADHD: Values associative connections, high engagement variability
 translator = RecoveryTranslator(calibration="adhd")
 
-# Rapid topic shifts are associative brilliance, not avoidance
-# High engagement variability is normal, not instability
-# Values the connections others miss
-```
-
-### Trauma/High-Stress Calibration
-```python
+# Trauma: Tactical communication, heightened awareness
 translator = RecoveryTranslator(calibration="trauma_informed")
-
-# Operational compression (brief, tactical) is adaptive
-# Heightened pattern awareness is survival skill
-# Doesn't pathologize hypervigilance
 ```
 
-## Gradient Tracking: The 20-Second Window
+## Academic Validation
 
-Research shows relapse can be predicted from emotional patterns in previous posts. Rose Glass provides real-time gradient tracking:
+Rose Glass dimensions are validated against peer-reviewed research:
 
-```python
-tracker = translator.get_gradient_tracker()
+| Finding | Source | Rose Glass Mapping |
+|---------|--------|-------------------|
+| "Stressed" has 40% similarity to "drink" | Kramer et al. 2024 | q-dimension |
+| "Bored" has 45% similarity to "craving" | Kramer et al. 2024 | q-dimension |
+| Social isolation predicts relapse | Lu et al. 2019 | f-dimension |
+| 78.48% accuracy predicting escalation | ResearchGate 2024 | Ψ-dimension |
 
-# Monitor q-dimension velocity
-tracker.add_datapoint(statement, timestamp)
-
-if tracker.q_gradient > threshold:
-    print(f"⚠️ Emotional escalation detected")
-    print(f"Trajectory: {tracker.predict_trajectory(seconds=60)}")
-    print(f"Intervention recommended: {tracker.intervention_reason}")
-```
-
-### What Gradients Reveal
-
-| Gradient | Meaning | Response |
-|----------|---------|----------|
-| **dq/dt > 0.3** | Rapid emotional escalation | De-escalation techniques |
-| **df/dt < -0.2** | Social isolation increasing | Reconnection focus |
-| **dΨ/dt < -0.2** | Narrative fragmenting | Grounding, consistency |
-| **dτ/dt < 0** | Temporal compression (crisis mode) | Slow down, breathe |
-
-## Integration with Eleos Health
-
-Rose Glass is designed to complement (not replace) Eleos documentation AI:
-
-| Eleos Captures | Rose Glass Adds |
-|----------------|-----------------|
-| "Patient discussed anxiety triggers" | q-activation velocity predicts crisis 20-60 seconds before peak |
-| "Therapist used CBT technique" | Ψ-coherence indicates therapeutic alliance health |
-| "Session lasted 45 minutes" | τ reveals performing recovery vs. authentic processing |
-| "Patient mentioned relapse concerns" | f-dimension shift signals isolation risk |
-
-See [docs/ELEOS_INTEGRATION.md](docs/ELEOS_INTEGRATION.md) for API integration guide.
+See [docs/ACADEMIC_VALIDATION.md](docs/ACADEMIC_VALIDATION.md) for complete mapping.
 
 ## Ethical Framework
 
 ### What We Don't Do
-- **No Profiling**: Rose Glass does not infer identity, diagnosis, or demographics
+- **No Profiling**: Never infer identity or demographics
 - **No Judgment**: Translation without quality assessment
-- **No Surveillance**: Designed for consensual therapeutic contexts only
-- **No Replacement**: Augments counselor intuition, never replaces it
+- **No Surveillance**: Consensual therapeutic contexts only
+- **No Replacement**: Augments counselor intuition, never replaces
 
 ### What We Do
 - **Validate Intuition**: Give language to what counselors already sense
-- **Enable Advocacy**: Provide documentation for clinical decision-making
+- **Enable Advocacy**: Documentation for clinical decision-making
 - **Respect Dignity**: All communication patterns are valid
 - **Cultural Humility**: Multiple lenses for multiple contexts
-
-### Consent Requirements
-- Client must consent to pattern analysis
-- Analysis results belong to therapeutic relationship
-- No data stored beyond session (ephemeral by design)
-- Client can request lens selection
-
-## Use Cases
-
-### ✅ Appropriate Uses
-- Augmenting counselor pattern recognition
-- Documenting intuition for clinical teams
-- Training new counselors on pattern awareness
-- Research on communication patterns (with consent)
-- Crisis prevention through early detection
-
-### ❌ Inappropriate Uses
-- Covert monitoring without consent
-- Automated treatment decisions
-- Insurance risk assessment
-- Employment screening
-- Any non-consensual application
 
 ## Project Structure
 
@@ -278,56 +221,30 @@ See [docs/ELEOS_INTEGRATION.md](docs/ELEOS_INTEGRATION.md) for API integration g
 rose-glass-recovery/
 ├── src/
 │   ├── core/
-│   │   ├── recovery_translator.py    # Main translation engine
-│   │   ├── gradient_tracker.py       # Real-time trajectory
-│   │   └── session_analyzer.py       # Multi-statement analysis
-│   ├── calibrations/
-│   │   ├── trauma_informed.py        # Default for addiction
-│   │   ├── autism_spectrum.py        # Neurodivergent support
-│   │   ├── adhd.py                   # ADHD communication
-│   │   └── veteran.py                # Military/first responder
-│   ├── integrations/
-│   │   ├── eleos_connector.py        # Eleos Health API
-│   │   └── ehr_adapters.py           # EHR system connectors
-│   └── research/
-│       ├── reddit_validation.py      # Academic validation tools
-│       └── outcome_correlation.py    # Outcome tracking
-├── tests/
+│   │   └── recovery_translator.py    # Main translation engine
+│   ├── calibrations/                  # Neurodivergent + cultural
+│   └── integrations/
+│       └── rose_glass_bridge.py      # ML/Regex bridge
 ├── docs/
 │   ├── ACADEMIC_VALIDATION.md
-│   ├── ELEOS_INTEGRATION.md
-│   ├── CALIBRATION_GUIDE.md
+│   ├── INTEGRATION_ARCHITECTURE.md
 │   └── ETHICS.md
-├── examples/
+├── tests/
 └── README.md
 ```
 
-## Roadmap
+## Related Repositories
 
-### Phase 1: Core Framework ✅
-- [x] Recovery-specific translator
-- [x] Trauma-informed calibration
-- [x] Gradient tracking
-- [x] Academic validation mapping
+| Repo | Purpose |
+|------|---------|
+| [rose-glass](https://github.com/GreatPyreneseDad/rose-glass) | Core v2.1 ML framework |
+| [RoseGlassLE](https://github.com/GreatPyreneseDad/RoseGlassLE) | Law enforcement extensions |
+| [rose-looking-glass](https://github.com/GreatPyreneseDad/rose-looking-glass) | API-ready implementation |
+| [emotionally-informed-rag](https://github.com/GreatPyreneseDad/emotionally-informed-rag) | Legal RAG with Rose Glass |
 
-### Phase 2: Integrations (In Progress)
-- [ ] Eleos Health connector
-- [ ] Session history analysis
-- [ ] EHR adapters (Epic, Cerner)
-- [ ] Outcome correlation tools
+## License
 
-### Phase 3: Clinical Validation
-- [ ] IRB-approved pilot study
-- [ ] Outcome tracking integration
-- [ ] Counselor feedback loop
-- [ ] Peer-reviewed publication
-
-## Research Foundation
-
-- **Grounded Coherence Theory** (GCT) - Christopher MacGregor bin Joseph
-- **Reddit Addiction NLP Research** - Kramer et al. 2024, Lu et al. 2019
-- **Trauma-Informed Care** - SAMHSA guidelines
-- **Neurodiversity Movement** - Nothing about us without us
+MIT License - See LICENSE file
 
 ## Citation
 
@@ -340,16 +257,6 @@ rose-glass-recovery/
   url = {https://github.com/GreatPyreneseDad/rose-glass-recovery}
 }
 ```
-
-## License
-
-MIT License - See LICENSE file
-
-## Contact
-
-- **Author**: Christopher MacGregor bin Joseph
-- **Purpose**: Behavioral health pattern translation
-- **Target Partners**: Eleos Health, behavioral health platforms
 
 ---
 
